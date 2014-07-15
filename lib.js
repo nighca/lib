@@ -27,8 +27,8 @@
     };
 
     var fns = {
-        on: function(){return this.addEventListener.apply(this, arguments)},
-        un: function(){return this.removeEventListener.apply(this, arguments)},
+        on: HTMLElement.prototype.addEventListener,
+        un: HTMLElement.prototype.removeEventListener,
         css: function(key, val){
             var ele = this;
             return type(key) === '[object String]' ?
@@ -50,8 +50,12 @@
         return decorate(type(selector) === '[object String]' ? (node || document).querySelector(selector) : selector);
     };
 
-    var $$ = function(){
-        return Array.prototype.slice.call(document.querySelectorAll.apply(document, arguments)).map(decorate);
+    var $$ = function(selector, node){
+        return Array.prototype.slice.call(
+            type(selector) === '[object String]' ?
+            (node || document).querySelectorAll(selector) :
+            selector
+        ).map(decorate);
     };
 
     // export helpers
