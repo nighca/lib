@@ -1,31 +1,141 @@
 (function(window){
     'use strict';
 
-    // helpers
+    /*
+     * obj operation
+     */
+
     var type = Object.prototype.toString.call.bind(Object.prototype.toString);
 
-    var forEach = function(object, handler){
-        if(type(object) === '[object Array]'){
-            for(var i = 0, l = object.length; i < l && handler.call(this, object[i], i) !== false; i++);
+    var forEach = function(obj, method){
+        if(type(obj) === '[object Array]'){
+            for(var i = 0, l = obj.length; i < l && method.call(this, obj[i], i) !== false; i++);
             return;
         }
 
-        for(var key in object) if(object.hasOwnProperty(key) && handler.call(this, object[key], key) === false) return;
+        for(var key in obj) if(obj.hasOwnProperty(key) && method.call(this, obj[key], key) === false) return;
     };
 
-    var clone = function(obj){
+    var transform = function(obj, method){
         if(!obj) return obj;
-        var o = new obj.constructor();
-        forEach(obj, function(val, key){o[key] = val});
-        return o;
+        var target = new obj.constructor();
+        forEach(obj, function(val, key){method(target, val, key)});
+        return target;
     };
 
-    var extend = function(target, addon, self){
-        target = (self ? target : clone(target)) || {};
+    var map = function(obj, method){
+        return transform(obj, function(target, val, key){target[key] = method ? method(val, key) : val});
+    };
+
+    var filter = function(obj, method){
+        return transform(obj, function(target, val, key){if(method(val, key)) target[key] = val});
+    };
+
+    var clone = map;
+
+    var extend = function(target, addon, alone){
+        target = (alone ? clone(target) : target) || {};
         forEach(addon, function(val, key){target[key] = val;});
         return target;
     };
 
+    /*
+     * ajax
+     */
+
+    var formatUrl = function(url, data){
+        var params = [];
+        forEach(data, function(val, key){
+            params.push([key, val].map(encodeURIComponent).join('='));
+        });
+
+        if(params.length){
+            url = url +
+                (url.indexOf('?') >= 0 ? '&' : '?') +
+                params.join('&');
+        }
+        return url;
+    };
+
+    // jsonp
+    var jsonp = function(url, data, callback){
+        if(!callback){
+            callback = data;
+            data = {};
+        }
+
+        data = extend({
+            cb: 'cb_' + (Math.random() + '').slice(2)
+        }, data);
+
+        url = formatUrl(url, data);
+
+        var script = extend(document.createElement('script'), {
+            src: url,
+            async: true,
+            charset: 'utf-8'
+        });
+
+        window[data.cb] = function(){
+            callback.apply(this, arguments);
+
+            document.head.removeChild(script);
+            script = null;
+        };
+
+        document.head.appendChild(script);
+    };
+
+    /*
+     * async
+     */
+
+    // [function(function(err, result)), ...], function(err, result) -> null
+    var finish = function(tasks, callback) {
+        var left = tasks.length,
+            results = [],
+            over = false;
+
+        if(!left){
+            callback();
+            return;
+        }
+
+        tasks.forEach(function(task, i){
+            task(function(err, result){
+                if(over){
+                    return;
+                }
+
+                if(err){
+                    over = true;
+                    throw err;
+                }else{
+                    results[i] = result;
+
+                    left--;
+
+                    if(!left){
+                        callback.apply(null, results);
+                    }
+                }
+            });
+        });
+    };
+
+    /*
+     * other helper
+     */
+
+    // 'a${x}c', {x:'b'} -> 'abc'
+    var format = function(template, vars) {
+        return template.replace(/\$\{([^\{\}]*)\}/g, function(_, name) {
+            var value = vars[name.trim()];
+            return value == null ? '' : value + '';
+        });
+    };
+
+    // decorate dom element
     var fns = {
         on: HTMLElement.prototype.addEventListener,
         un: HTMLElement.prototype.removeEventListener,
@@ -42,8 +152,9 @@
         find: function(selector){return $(selector, this)},
         parent: function(){return decorate(this.parentNode)}
     };
+
     var decorate = function(element){
-        return element ? extend(element, fns, true) : element;
+        return element ? extend(element, fns) : element;
     };
 
     var $ = function(selector, node){
@@ -63,13 +174,19 @@
     extend($, {
         type: type,
         forEach: forEach,
+        map: map,
+        filter: filter,
         clone: clone,
-        extend: extend
-    }, true);
+        extend: extend,
+        formatUrl: formatUrl,
+        jsonp: jsonp,
+        finish: finish,
+        format: format
+    });
 
     extend(window, {
         $: $,
         $$: $$
-    }, true);
+    });
 
 })(this);
