@@ -1,0 +1,34 @@
+{
+    "name": "lib",
+    "version": "1.0.0",
+    "description": "browser-javascript, jquery-like lib",
+    "main": "lib.js",
+    "directories": {
+        "test": "test"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "del": "^0.1.1",
+        "gulp": "^3.8.7",
+        "gulp-concat": "^2.3.4",
+        "gulp-mocha": "^1.1.0",
+        "gulp-replace": "^0.4.0",
+        "gulp-uglify": "^0.3.1"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nighca/lib.git"
+    },
+    "author": {
+        "name": "nighca",
+        "email": "nighca@live.cn"
+    },
+    "license": "Apache",
+    "bugs": {
+        "url": "https://github.com/nighca/lib/issues"
+    },
+    "homepage": "https://github.com/nighca/lib"
+}
