@@ -1,4 +1,4 @@
-/*! lib v1.0.0 | nighca(nighca@live.cn) | Apache License(2.0) */
+/*! lib v1.1.0 | nighca(nighca@live.cn) | Apache License(2.0) */
 (function(window){
     'use strict';
 
@@ -139,6 +139,7 @@
         show: function(){this.css('display', '')},
         hide: function(){this.css('display', 'none')},
         find: function(selector){return $(selector, this)},
+        findAll: function(selector){return $$(selector, this)},
         parent: function(){return decorate(this.parentNode)}
     };
 

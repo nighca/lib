@@ -150,6 +150,7 @@
         show: function(){this.css('display', '')},
         hide: function(){this.css('display', 'none')},
         find: function(selector){return $(selector, this)},
+        findAll: function(selector){return $$(selector, this)},
         parent: function(){return decorate(this.parentNode)}
     };
 
