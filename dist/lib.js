@@ -1,4 +1,4 @@
-/*! lib v1.1.0 | nighca(nighca@live.cn) | Apache License(2.0) */
+/*! lib v1.2.0 | nighca(nighca@live.cn) | Apache License(2.0) */
 (function(window){
     'use strict';
 
@@ -130,14 +130,37 @@
         un: HTMLElement.prototype.removeEventListener,
         css: function(key, val){
             var ele = this;
-            return type(key) === '[object String]' ?
+            type(key) === '[object String]' ?
                 this.style.setProperty(key, val) :
                 forEach(key, function(v, k){
                     ele.css(k, v);
                 });
+            return this;
         },
-        show: function(){this.css('display', '')},
-        hide: function(){this.css('display', 'none')},
+        addClass: function(adds){
+            var clses = this.className.split(' ');
+            adds.split(' ').forEach(function(cls){
+                var i = clses.indexOf(cls);
+                if(i < 0){
+                    clses.push(cls);
+                }
+            });
+            this.className = clses.join(' ');
+            return this;
+        },
+        removeClass: function(rms){
+            var clses = this.className.split(' ');
+            rms.split(' ').forEach(function(cls){
+                var i = clses.indexOf(cls);
+                if(i >= 0){
+                    clses[i] = null;
+                }
+            });
+            this.className = clses.filter(function(cls){return cls}).join(' ');
+            return this;
+        },
+        show: function(){this.css('display', '');return this;},
+        hide: function(){this.css('display', 'none');return this;},
         find: function(selector){return $(selector, this)},
         findAll: function(selector){return $$(selector, this)},
         parent: function(){return decorate(this.parentNode)}
